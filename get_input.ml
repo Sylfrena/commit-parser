@@ -3,6 +3,11 @@ open Printf
 
 let file = "diff.txt"
 
+let check_line line =
+  match line.[0] with
+  |'+' -> line
+  | _ -> ""
+  ;;
 
 let () = (*entry point*)
   let ic = open_in file in
@@ -15,12 +20,8 @@ let () = (*entry point*)
        * hard to read so in is preferred to store the output of a function call
        * and later use it in another context.
       *)
-      let line = input_line ic in   (*in required when there is a follow up line*)
+      let line = check_line (input_line ic) in   (*in required when there is a follow up line*)
       printf "%s\n\n" line
     done
   with 
     End_of_file -> close_in ic
-
-  
-  
-
