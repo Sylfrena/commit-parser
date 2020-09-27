@@ -1,0 +1,37 @@
+diff --git a/drivers/staging/rtl8192u/r8192U_wx.c b/drivers/staging/rtl8192u/r8192U_wx.
+c
+index 1d1685d2e908..d853586705fc 100644
+--- a/drivers/staging/rtl8192u/r8192U_wx.c
++++ b/drivers/staging/rtl8192u/r8192U_wx.c
+@@ -253 +253 @@ static int rtl8180_wx_get_range(struct net_device *dev,
+-       if (priv->rf_set_sens != NULL)
++       if (priv->rf_set_sens)
+@@ -669 +669 @@ static int r8192_wx_get_sens(struct net_device *dev,
+-       if (priv->rf_set_sens == NULL)
++       if (!priv->rf_set_sens)
+@@ -683 +683 @@ static int r8192_wx_set_sens(struct net_device *dev,
+-       if (priv->rf_set_sens == NULL) {
++       if (!priv->rf_set_sens) {
+diff --git a/drivers/staging/rtl8192u/r819xU_cmdpkt.c b/drivers/staging/rtl8192u/r819xU
+_cmdpkt.c
+index c58c9cac2599..4cece40a92f6 100644
+--- a/drivers/staging/rtl8192u/r819xU_cmdpkt.c
++++ b/drivers/staging/rtl8192u/r819xU_cmdpkt.c
+@@ -433 +433 @@ static void cmpk_handle_tx_rate_history(struct net_device *dev, u8 *pms
+g)
+-       if (ptxrate == NULL)
++       if (!ptxrate)
+@@ -482 +482 @@ u32 cmpk_message_handle_rx(struct net_device *dev,
+-       if (pstats == NULL)
++       if (!pstats)
+diff --git a/drivers/staging/rtl8192u/r819xU_phy.c b/drivers/staging/rtl8192u/r819xU_ph
+y.c
+index aa71ea97a179..eef751d2b12e 100644
+--- a/drivers/staging/rtl8192u/r819xU_phy.c
++++ b/drivers/staging/rtl8192u/r819xU_phy.c
+@@ -1153 +1153 @@ static u8 rtl8192_phy_SetSwChnlCmdArray(struct sw_chnl_cmd *CmdTable,
+ u32 CmdTab
+-       if (CmdTable == NULL) {
++       if (!CmdTable) {
+
+
