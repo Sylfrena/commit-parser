@@ -10,7 +10,7 @@ let parse_file =
         match (input_line ic).[0] with
         |'-' -> input_line ic 
         |'+' -> input_line ic
-        | _  -> ""
+        | _  -> ""  in
     done
   with 
     End_of_file -> close_in ic 
