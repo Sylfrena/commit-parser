@@ -1,0 +1,155 @@
+diff --git a/f b/f
+index 212a48b..68b5a1a 100755
+Binary files a/f and b/f differ
+diff --git a/fetch_info.cmi b/fetch_info.cmi
+index 4dc8dfb..734cbe1 100644
+Binary files a/fetch_info.cmi and b/fetch_info.cmi differ
+diff --git a/fetch_info.cmo b/fetch_info.cmo
+index 9033cd1..427a8c5 100644
+Binary files a/fetch_info.cmo and b/fetch_info.cmo differ
+diff --git a/fetch_info.ml b/fetch_info.ml
+index 2bef3bd..3e02470 100644
+--- a/fetch_info.ml
++++ b/fetch_info.ml
+@@ -1,12 +1,14 @@
+ open Printf
+ open Str
+ 
++
+ type diff_info = 
+-  | File_name  of Str.split_result list
+-  | Deletions  of int
+-  | Additions  of int
+-  | Addition_str  of string
+-  | Deletion_str  of string
++{   
++    file_name: Str.split_result list; 
++    deletions: int;
++    additions: int;
++    line_no: (int * int) list;
++}
+   
+ let syname: string = "diff --git a/drivers/staging/rtl8192u/r8192U_wx.c b/drivers/staging/rtl8192u/r8192U_wx."
+ 
+@@ -14,6 +16,10 @@ let fileb =
+   let pat_filename = Str.regexp "a/\\(.+\\)b" in
+   let s = Str.full_split pat_filename syname in
+   s
++
++let c = "a/dri..."
++let reg = Str. regexp "a/"
++let d = Str.replace_first reg "" c
+  
+ let fileadd = 
+   let pat_additon_str = Str.regexp "^(\+)[^+]" in
+@@ -21,16 +27,23 @@ let fileadd =
+ ;;
+ 
+ 
+-let d = 1;;
+-let a = 2;;
+-let del = "hullo";;
++let d = 1
++let a = 2
++let del = "hullo"
++
++let c = "a/dri..."
++let reg = Str. regexp "a/"
++let d = Str.replace_first (Str.regexp "a/") "" c
+ 
+-let d1 =(
+- File_name(fileb);
+-  Deletions(d);
+-  Additions(a); 
+-  Addition_str(fileadd); 
+-  Deletion_str(del))
++
++(*let d1: diff_info =
++{
++  file_name(fileb);
++  deletions(d);
++  additions(a); 
++  addition_str(fileadd); 
++  deletion_str(del)
++}*)
+    
+ 
+ (*let print_list_string (myList: split_result list) = 
+@@ -46,8 +59,12 @@ printf "%s\n\n" fileadd;
+ printf "%s%s" fileb
+ *)
+ 
+-let () = 
+-match d1 with
++let () = printf "%s" d;;
++
++
++
++
++(*match d1 with
+ | Deletion_str i -> print_string i
+ | File_name b ->
+   begin
+@@ -56,7 +73,6 @@ match d1 with
+     |hd::tl -> 
+   end
+ | _ -> print_string "jullo"
+-;;
+-
++;;*)
+ 
+ 
+diff --git a/just_print.cmi b/just_print.cmi
+index 808df65..959f9ad 100644
+Binary files a/just_print.cmi and b/just_print.cmi differ
+diff --git a/just_print.cmo b/just_print.cmo
+index 563a99f..bf9c193 100644
+Binary files a/just_print.cmo and b/just_print.cmo differ
+diff --git a/just_print.ml b/just_print.ml
+index 8f571d1..fbc94fb 100644
+--- a/just_print.ml
++++ b/just_print.ml
+@@ -1,12 +1,30 @@
+ open Printf
+ open Str
+-let syname: string = "diff --git a/drivers/usc/filex.c b/drivers/usc/filex"
++let syname: string = "@@ -253 +253 @@ static int rtl8180_wx_get_range(struct net_device *dev,"
+ 
++let read_whole_file filename =
++  let ch = open_in filename in
++  let s = really_input_string ch (in_channel_length ch) in
++  close_in ch;
++  s
++
++let diff = read_whole_file "diff.txt"
++let diff2 = read_whole_file "diff2.txt"
++
++(*Str.replace_first (Str.regexp "a/") ""*)
+ let fileb = 
+-  let pat_filename = Str.regexp "a/\\(.+\\)" in
+-  let s = Str.full_split pat_filename syname in
++  let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]" in
++  let s = Str.full_split pat_filename diff in
++  s
++
++let linnum = 
++  let pat_linnum = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
++  let s = Str.full_split pat_linnum diff2 in
+   s
+ 
++
++
++  
+ let print_split_res (elem: Str.split_result) =
+   match elem with
+   | Text t -> ()
+@@ -18,5 +36,6 @@ let rec print_list (l: Str.split_result list) =
+   | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
+ ;;
+ 
+-() = print_list fileb
+-(*List.iter(printf "%shi***") fileb*)
+\ No newline at end of file
++() = print_list linnum
++(*List.iter(printf "%shi***") fileb*)
++

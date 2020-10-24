@@ -1,12 +1,14 @@
 open Printf
 open Str
 
+
 type diff_info = 
-  | File_name  of Str.split_result list
-  | Deletions  of int
-  | Additions  of int
-  | Addition_str  of string
-  | Deletion_str  of string
+{   
+    file_name: Str.split_result list; 
+    deletions: int;
+    additions: int;
+    line_no: (int * int) list;
+}
   
 let syname: string = "diff --git a/drivers/staging/rtl8192u/r8192U_wx.c b/drivers/staging/rtl8192u/r8192U_wx."
 
@@ -14,6 +16,10 @@ let fileb =
   let pat_filename = Str.regexp "a/\\(.+\\)b" in
   let s = Str.full_split pat_filename syname in
   s
+
+let c = "a/dri..."
+let reg = Str. regexp "a/"
+let d = Str.replace_first reg "" c
  
 let fileadd = 
   let pat_additon_str = Str.regexp "^(\+)[^+]" in
@@ -21,16 +27,23 @@ let fileadd =
 ;;
 
 
-let d = 1;;
-let a = 2;;
-let del = "hullo";;
+let d = 1
+let a = 2
+let del = "hullo"
 
-let d1 =(
- File_name(fileb);
-  Deletions(d);
-  Additions(a); 
-  Addition_str(fileadd); 
-  Deletion_str(del))
+let c = "a/dri..."
+let reg = Str. regexp "a/"
+let d = Str.replace_first (Str.regexp "a/") "" c
+
+
+(*let d1: diff_info =
+{
+  file_name(fileb);
+  deletions(d);
+  additions(a); 
+  addition_str(fileadd); 
+  deletion_str(del)
+}*)
    
 
 (*let print_list_string (myList: split_result list) = 
@@ -46,8 +59,12 @@ printf "%s\n\n" fileadd;
 printf "%s%s" fileb
 *)
 
-let () = 
-match d1 with
+let () = printf "%s" d;;
+
+
+
+
+(*match d1 with
 | Deletion_str i -> print_string i
 | File_name b ->
   begin
@@ -56,7 +73,6 @@ match d1 with
     |hd::tl -> 
   end
 | _ -> print_string "jullo"
-;;
-
+;;*)
 
 

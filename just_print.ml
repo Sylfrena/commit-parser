@@ -1,12 +1,30 @@
 open Printf
 open Str
-let syname: string = "diff --git a/drivers/usc/filex.c b/drivers/usc/filex"
+let syname: string = "@@ -253 +253 @@ static int rtl8180_wx_get_range(struct net_device *dev,"
 
-let fileb = 
-  let pat_filename = Str.regexp "a/\\(.+\\)" in
-  let s = Str.full_split pat_filename syname in
+let read_whole_file filename =
+  let ch = open_in filename in
+  let s = really_input_string ch (in_channel_length ch) in
+  close_in ch;
   s
 
+let diff = read_whole_file "diff.txt"
+let diff2 = read_whole_file "diff2.txt"
+
+(*Str.replace_first (Str.regexp "a/") ""*)
+let fileb = 
+  let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]" in
+  let s = Str.full_split pat_filename diff in
+  s
+
+let linnum = 
+  let pat_linnum = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
+  let s = Str.full_split pat_linnum diff2 in
+  s
+
+
+
+  
 let print_split_res (elem: Str.split_result) =
   match elem with
   | Text t -> ()
@@ -18,5 +36,6 @@ let rec print_list (l: Str.split_result list) =
   | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
 ;;
 
-() = print_list fileb
+() = print_list linnum
 (*List.iter(printf "%shi***") fileb*)
+
