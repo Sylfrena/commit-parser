@@ -1,6 +1,18 @@
 open Printf
 open Str
 
+let bash_help =
+  let ic = Unix.open_process_in "cd ~/Elantris/meshery && git diff" in 
+  let all_input = ref [] in 
+  try
+    while true do
+      all_input := input_line ic :: !all_input
+    done
+  with
+    End_of_file -> close_in ic;
+    List.iter print_endline !all_input
+
+
 
 type diff_info = 
 {   
