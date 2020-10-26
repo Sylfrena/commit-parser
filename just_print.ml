@@ -9,18 +9,20 @@ let read_whole_file filename =
   close_in ch;
   s
 
-let print_split_res (elem: Str.split_result) =
+(*let print_split_res (elem: Str.split_result) =
   match elem with
   | Text t -> ()
-  | Delim d -> print_string d
+  | Delim d -> print_string d*)
 
 let rec print_list (l: Str.split_result list) =
   match l with
   | [] -> ()
-  | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
+  | Text hd :: tl ->  print_list tl
+  | Delim hd :: tl -> print_string hd ; print_string "\n" ; print_list tl
 ;;
-let bash_read_help  =
-  let ic = Unix.open_process_in "cd ~/Elantris/meshery && git diff" in 
+let bash_read_help fpath =
+  let com = "cd " ^ fpath ^ " && git diff | egrep '^+++|^@'" in
+  let ic = Unix.open_process_in com in 
   let all_input = ref [] in 
   try
     while true do
@@ -32,15 +34,15 @@ let bash_read_help  =
     List.rev !all_input;;
 
 
-let fetch_file_name = 
+let fetch_file_name lines = 
   let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]" in
-  let diff = String.concat "\n" bash_read_help in 
+  let diff = String.concat "\n" lines  in 
   let s = Str.full_split pat_filename diff in
   s;;
   
-let fetch_line_number  = 
+let fetch_line_number lines  = 
   let pat_linnum = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
-  let diff = String.concat "\n" bash_read_help in
+  let diff = String.concat "\n" lines in
   let s = Str.full_split pat_linnum diff in
   s;;
 
@@ -64,7 +66,8 @@ let d = Str.replace_first (Str.regexp "a/") ""
 (*let sample1 : diff_info = {fetch_file_name g; fetch_line_number }
 *)
 
-let () = 
-  print_list fetch_file_name;
-  print_list fetch_line_number;
-  
+
+let () =
+  let lines = bash_read_help "~/Elantris/coccinelle" in
+  print_list (fetch_file_name lines);
+  print_list (fetch_line_number lines);
