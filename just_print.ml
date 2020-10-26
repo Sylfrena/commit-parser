@@ -20,7 +20,7 @@ let rec print_list (l: Str.split_result list) =
   | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
 ;;
 let bash_read_help  =
-  let ic = Unix.open_process_in "cd ~/Elantris/v4l-utils && git diff" in 
+  let ic = Unix.open_process_in "cd ~/Elantris/meshery && git diff" in 
   let all_input = ref [] in 
   try
     while true do
@@ -31,26 +31,40 @@ let bash_read_help  =
     End_of_file -> close_in ic;
     List.rev !all_input;;
 
-let fileb in_str = 
+
+let fetch_file_name = 
   let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]" in
-  let s = Str.full_split pat_filename in_str in
+  let diff = String.concat "\n" bash_read_help in 
+  let s = Str.full_split pat_filename diff in
   s;;
   
-let line_numb in_str = 
+let fetch_line_number  = 
   let pat_linnum = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
-  let s = Str.full_split pat_linnum in_str in
+  let diff = String.concat "\n" bash_read_help in
+  let s = Str.full_split pat_linnum diff in
   s;;
 
- 
+(*let rec parse_line_number (l: Str.split_result list) =
+  match l with
+  | [] -> ()
+  | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
+;;*)
 
-    
-let g = String.concat "" bash_read_help
+
+type diff_info = 
+{   
+    file_name: Str.split_result list; 
+    additions: int;
+    line_no: (int * int) list;
+}
 let diff = read_whole_file "diff.txt"
 let diff2 = read_whole_file "diff2.txt"
+let d = Str.replace_first (Str.regexp "a/") "" 
 
-(*Str.replace_first (Str.regexp "a/") ""*)
+(*let sample1 : diff_info = {fetch_file_name g; fetch_line_number }
+*)
 
-
-
-(*print_list linnum*)(*List.iter(printf "%shi***") fileb*)
-let () = print_list fileb;
+let () = 
+  print_list fetch_file_name;
+  print_list fetch_line_number;
+  
