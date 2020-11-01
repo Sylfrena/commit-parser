@@ -8,12 +8,6 @@ let read_whole_file filename =
   let s = really_input_string ch (in_channel_length ch) in
   close_in ch;
   s
-
-(*let print_split_res (elem: Str.split_result) =
-  match elem with
-  | Text t -> ()
-  | Delim d -> print_string d*)
-
 let rec print_list (l: Str.split_result list) =
   match l with
   | [] -> ()
@@ -68,6 +62,6 @@ let d = Str.replace_first (Str.regexp "a/") ""
 
 
 let () =
-  let lines = bash_read_help "~/Elantris/coccinelle" in
+  let lines = bash_read_help "~/Elantris/snowflower/commit-parser" in
   print_list (fetch_file_name lines);
   print_list (fetch_line_number lines);
