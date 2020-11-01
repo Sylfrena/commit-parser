@@ -8,7 +8,9 @@ let read_whole_file filename =
   let s = really_input_string ch (in_channel_length ch) in
   close_in ch;
   s
-let rec print_list (l: Str.split_result list) (t: int) =
+
+(*Breakdown split_result_list type to primtive type*)
+  let rec print_list (l: Str.split_result list) (t: int) =
   match l, t with
   | [], _ -> ()
   | Text hd :: tl, _ ->  print_list tl t 
@@ -16,6 +18,8 @@ let rec print_list (l: Str.split_result list) (t: int) =
   | Delim hd :: tl, 0 -> print_string (Str.replace_first (Str.regexp "+") "" hd) ; print_string "\n" ; print_list tl t
   | Delim hd :: tl, _ -> print_string hd ; print_string "\n" ; print_list tl t
 ;;
+
+(*Fetch diff for specified path*)
 let bash_read_help fpath =
   let command = "cd " ^ fpath ^ " && git diff | egrep '^+++|^@'" in
   let ic = Unix.open_process_in command in 
@@ -31,7 +35,7 @@ let bash_read_help fpath =
 
 
 let fetch_file_name lines = 
-  let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]" in
+  let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]+" in
   (*let diff = String.concat "\n" lines  in *)
   let s = Str.full_split pat_filename lines in
   s;;
@@ -41,13 +45,6 @@ let fetch_line_number lines  =
   (*let diff = String.concat "\n" lines in*)
   let s = Str.full_split pat_linnum lines in
   s;;
-
-(*let rec parse_line_number (l: Str.split_result list) =
-  match l with
-  | [] -> ()
-  | hd :: tl -> print_split_res hd ; print_string "\n" ; print_list tl
-;;*)
-
 
 type diff_info = 
 {   
@@ -71,20 +68,10 @@ let extract_names line =
 
 
 let () =
-  let lines = bash_read_help "~/Elantris/snowflower/commit-parser" in
+  let lines = bash_read_help "~/Elantris/coccinelle" in
   List.iter extract_names lines
 ;; 
-  (*
-  +++ b/get_input.m
-  +1,6
-  +++ b/just_print.m
-  +15,8
-  +30,14
-  +53,39
   
-  print_list (fetch_file_name lines);
-  print_list (fetch_line_number lines);*)
-
 
 
 (*let diff = read_whole_file "diff.txt"
