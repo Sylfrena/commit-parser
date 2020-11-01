@@ -1,6 +1,6 @@
 
 open Printf
-
+(*random comment*)
 let file = "diff.txt"
 
 let check_line line =
