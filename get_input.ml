@@ -8,6 +8,7 @@ let check_line line =
   |'+' -> line
   | _ -> ""
   ;;
+(*hullo*)
 
 let () = (*entry point*)
   let ic = open_in file in
