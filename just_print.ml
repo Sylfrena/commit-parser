@@ -1,6 +1,5 @@
 open Printf
 open Str
-let syname: string = "@@ -253 +253 @@ static int rtl8180_wx_get_range(struct net_device *dev,"
 
 (*Read file contents*)
 let read_whole_file filename =
@@ -10,11 +9,11 @@ let read_whole_file filename =
   s
 
 (*Breakdown split_result_list type to primtive type*)
-  let rec print_list (l: Str.split_result list)  =
+let rec decompose_list (l: Str.split_result list)  =
   match l with
   | [] -> []
-  | Text hd :: tl ->  print_list tl  
-  | Delim hd :: tl -> hd ::  print_list tl 
+  | Text hd :: tl ->  decompose_list tl  
+  | Delim hd :: tl -> hd ::  decompose_list tl 
 ;;
 
 (*Fetch diff for specified path*)
@@ -34,32 +33,22 @@ let bash_read_help fpath =
 let extract_numbers line =
   let sep = String.split_on_char ',' line in
   match sep with
-  | [l] -> (l, l)
-  | [f ; e] -> (f, e)
-  | _ -> failwith "no line"
-  (*let arr = Array.of_list sep in
-  let arr_i = Array.map int_of_string arr in
-  arr_i.(1) =  arr_i.(0) + arr_i.(1) - 1*)
+  | [l] -> (int_of_string l, int_of_string l)
+  | [f ; e] -> (int_of_string f, int_of_string e)
+  | _ -> failwith "no line numbers found, sorry"
 ;;
-let fetch_file_name lines = 
+let fetch_file_name line = 
   let pat_filename = Str.regexp "\\(+++ b\\)/\\(.+\\)\\.[a-z]+" in
-  (*let diff = String.concat "\n" lines  in *)
-  let s = Str.full_split pat_filename lines in
-  print_list s
+  let s = Str.full_split pat_filename line in
+  decompose_list s
 ;;
-  
-let fetch_line_number lines  = 
-  let pat_linnum = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
-  (*let diff = String.concat "\n" lines in*)
-  let s = Str.full_split pat_linnum lines in
-  let faa = print_list s in
-  List.map 
-    (function fa ->  
-        let (b, e) = extract_numbers fa in 
-        (b, e)) 
-    faa 
+let fetch_line_number line  = 
+  let pat_line_num = Str.regexp "\\(\\+\\([0-9]+,[0-9]+\\)\\)" in
+  let s = Str.full_split pat_line_num line in
+  let fa = List.hd (decompose_list s) in  
+  let (b, e) = extract_numbers fa in 
+  (b, (b + e)) (*start of diff, end of diff *) 
 ;;
-
 
 type diff_info = 
 {   
@@ -67,55 +56,59 @@ type diff_info =
     line_no: (int * int) list;
 }
 
-type patch_i = No_info | File_info of string list | Line_info of (string * string) list 
+type patch_info = No_info | File_info of string list | Line_info of (int * int)  
 
-
-(* let  
-
-*)
 (*let sample1 : diff_info = {fetch_file_name g; fetch_line_number }
 *)
 
 (*check line and extract file name or file number*)
 let extract_info line =
-  if Str.string_match (Str.regexp_string "+++") line 0
-    then 
-      File_info (fetch_file_name line)
-  else if Str.string_match (Str.regexp_string "@@ ") line 0
-    then 
-      Line_info (fetch_line_number line)
+  if Str.string_match (Str.regexp_string "+++") line 0 then 
+    File_info (fetch_file_name line)
+  else if Str.string_match (Str.regexp_string "@@ ") line 0 then 
+    Line_info (fetch_line_number line)
   else
     No_info
-     
-    (*let line_first = String.sub line 0 1 in
-      match line_first with
-      | "+" -> fetch_file_name line
-      | "@" -> fetch_line_number line 
-      | _ ->  ()*)
- 
-let rec reorg_helper a = function 
-[] -> (List.rev a, [])
-| No_info :: tl -> reorg_helper a tl
-| File_info file_list :: tl -> (List.rev a, File_info file_list :: tl)
-| Line_info line_list :: tl ->  reorg_helper (line_list :: a) tl
+let rec reorg_helper new_list = function 
+[] -> (List.rev new_list, [])
+| No_info :: tl -> reorg_helper new_list tl
+| File_info file_list :: tl -> (List.rev new_list, File_info file_list :: tl)
+| Line_info line_list :: tl ->  reorg_helper (line_list :: new_list) tl
 ;;    
 let rec reorg = function 
 [] -> []
 | No_info :: tl -> reorg tl
-| File_info file_list :: tl -> 
+| File_info [file] :: tl -> 
   let lines, rest = reorg_helper [] tl in
   {   
-    file_name = file_list ;   
+    file_name = file;   
     line_no = lines;   
-} :: reorg rest
-   
+  } :: reorg rest
+| File_info file_list :: tl ->  
+    let lines, rest = reorg_helper [] tl in
+    reorg rest 
 | Line_info line_list :: tl ->  failwith "bad case"  
+let rec mlines lines = 
+  match lines with
+  | [] -> []
+  | hd :: tl -> extract_info hd :: mlines tl
+let direc = "~/Elantris/snowflower/commit-parser"
+let final_info dir =
+  let list_diff = reorg (mlines (bash_read_help dir)) in   
+  list_diff;;
 
+let rec print_tuple_list l = 
+  match l with
+  | [] -> ()
+  | (a,b) :: tl -> printf "\n%d, %d" a b; print_tuple_list tl
+
+
+(*TODO: give relevant names*)
 let () =
-  let lines = bash_read_help "~/Elantris/snowflower/commit-parser" in
-  List.iter extract_info lines
-;;
-
-(*let diff = read_whole_file "diff.txt"
-let diff2 = read_whole_file "diff2.txt"
-let d = Str.replace_first (Str.regexp "a/") "" *)
+  let ou = final_info direc in 
+  let rec pf bl =
+    match bl with
+  | [] -> print_string "end"
+  | hd :: tl -> print_string hd.file_name; print_tuple_list hd.line_no in                 
+  pf ou;;
+                 
